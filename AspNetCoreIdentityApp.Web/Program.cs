@@ -16,6 +16,21 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddIdentityWithExt();
 
+
+builder.Services.ConfigureApplicationCookie(opt =>
+{
+    var cookieBuilder = new CookieBuilder();
+
+    cookieBuilder.Name = "UdemyAppCookie";
+    opt.LoginPath = new PathString("/Home/Signin");
+
+    opt.Cookie = cookieBuilder;
+    opt.ExpireTimeSpan = TimeSpan.FromDays(60);
+    opt.SlidingExpiration = true;
+
+});
+
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
