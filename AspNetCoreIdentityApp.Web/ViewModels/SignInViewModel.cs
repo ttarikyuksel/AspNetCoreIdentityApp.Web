@@ -20,7 +20,7 @@ namespace AspNetCoreIdentityApp.Web.ViewModels
         public string Email { get; set; }
 
 
-
+        [DataType(DataType.Password)]
         [Required(ErrorMessage = "Şifre Alanı Boş Bırakılamaz")]
         [Display(Name = "Şifre :")]
         public string Password { get; set; }

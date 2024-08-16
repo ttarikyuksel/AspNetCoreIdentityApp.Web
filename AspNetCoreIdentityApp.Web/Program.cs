@@ -1,6 +1,10 @@
 using AspNetCoreIdentityApp.Web.Extensions;
 using AspNetCoreIdentityApp.Web.Models;
+using AspNetCoreIdentityApp.Web.OptionsModel;
+using AspNetCoreIdentityApp.Web.Services;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,8 +18,15 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("SqlCon"));
 });
 
-builder.Services.AddIdentityWithExt();
+builder.Services.Configure<SecurityStampValidatorOptions>(options =>
+{
+    options.ValidationInterval = TimeSpan.FromMinutes(30);
+});
 
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
+
+builder.Services.AddIdentityWithExt();
+builder.Services.AddScoped<IEmailService,EmailService>();
 
 builder.Services.ConfigureApplicationCookie(opt =>
 {
@@ -23,7 +34,7 @@ builder.Services.ConfigureApplicationCookie(opt =>
 
     cookieBuilder.Name = "UdemyAppCookie";
     opt.LoginPath = new PathString("/Home/Signin");
-
+    opt.LogoutPath = new PathString("/Member/Logout");
     opt.Cookie = cookieBuilder;
     opt.ExpireTimeSpan = TimeSpan.FromDays(60);
     opt.SlidingExpiration = true;
@@ -45,7 +56,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
-
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(
