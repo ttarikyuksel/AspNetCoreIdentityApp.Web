@@ -7,7 +7,7 @@ namespace AspNetCoreIdentityApp.Web.ViewModels
         [DataType(DataType.Password)]
         [Required(ErrorMessage = "Şifre Alanı Boş Bırakılmaz.")]
         [Display(Name = "Yeni Şifre :")]
-        public string Password { get; set; }
+        public string Password { get; set; } = null!;
 
 
 
@@ -15,6 +15,6 @@ namespace AspNetCoreIdentityApp.Web.ViewModels
         [Compare(nameof(Password), ErrorMessage = "Şifre Aynı Değildir.")]
         [Required(ErrorMessage = "Şifre Tekrar Alanı Boş Bırakılmaz.")]
         [Display(Name = "Yeni Şifre Tekrar :")]
-        public string PasswordConfirm { get; set; }
+        public string PasswordConfirm { get; set; } = null!;
     }
 }

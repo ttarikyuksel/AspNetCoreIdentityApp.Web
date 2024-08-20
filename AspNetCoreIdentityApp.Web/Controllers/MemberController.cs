@@ -52,7 +52,7 @@ namespace AspNetCoreIdentityApp.Web.Controllers
 
             var currentUser = await _userManager.FindByNameAsync(User.Identity!.Name!);
 
-            var checkOldPassword = await _userManager.CheckPasswordAsync(currentUser, request.PasswordOld);
+            var checkOldPassword = await _userManager.CheckPasswordAsync(currentUser!, request.PasswordOld);
 
             if (!checkOldPassword)
             {
@@ -60,16 +60,16 @@ namespace AspNetCoreIdentityApp.Web.Controllers
                 return View();
             }
 
-            var resultChangePassword = await _userManager.ChangePasswordAsync(currentUser, request.PasswordOld, request.PasswordNew);
+            var resultChangePassword = await _userManager.ChangePasswordAsync(currentUser!, request.PasswordOld, request.PasswordNew);
             if (!resultChangePassword.Succeeded)
             {
                 ModelState.AddModelErrorList(resultChangePassword.Errors.Select(x=>x.Description).ToList());
                 return View();
             }
 
-            await _userManager.UpdateSecurityStampAsync(currentUser);
+            await _userManager.UpdateSecurityStampAsync(currentUser!);
             await _signInManager.SignOutAsync();
-            await _signInManager.PasswordSignInAsync(currentUser,request.PasswordNew,true,false);
+            await _signInManager.PasswordSignInAsync(currentUser!,request.PasswordNew,true,false);
 
             TempData["SuccessMessage"] = "Şifre Değiştirme İşlemi Başarıyla Gerçekleşmiştir.";
 

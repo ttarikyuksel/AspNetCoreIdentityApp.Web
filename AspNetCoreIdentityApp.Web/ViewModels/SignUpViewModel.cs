@@ -18,29 +18,29 @@ namespace AspNetCoreIdentityApp.Web.ViewModels
 
         [Required(ErrorMessage ="Kullanıcı Adı Alanı Boş Bırakılmaz.")]
         [Display(Name ="Kullanıcı Adı :")]
-        public string UserName { get; set; }
+        public string UserName { get; set; } = null!;
 
         [EmailAddress(ErrorMessage ="Email Formatı Yanlış.")]
         [Required(ErrorMessage = "Email Alanı Boş Bırakılamaz.")]
         [Display(Name ="Email :")]
-        public string Email { get; set; }
+        public string Email { get; set; } = null!;
 
         [Required(ErrorMessage = "Telefon Alanı Boş Bırakılmaz.")]
         [Display(Name ="Telefon :")]
-        public string Phone { get; set; }
+        public string Phone { get; set; } = null!;
 
         [DataType(DataType.Password)]
         [Required(ErrorMessage = "Şifre Alanı Boş Bırakılmaz.")]
         [Display(Name = "Şifre :")]
         [MinLength(6, ErrorMessage = "Şifreniz en az 6 karakter olabilir.")]
-        public string Password { get; set; }
+        public string Password { get; set; } = null!;
 
         [DataType(DataType.Password)]
         [Compare(nameof(Password),ErrorMessage ="Şifre Aynı Değildir.")]
         [Required(ErrorMessage = "Şifre Tekrar Alanı Boş Bırakılmaz.")]
         [Display(Name = "Şifre Tekrar :")]
         [MinLength(6, ErrorMessage = "Şifreniz en az 6 karakter olabilir.")]
-        public string PasswordConfirm { get; set; }
+        public string PasswordConfirm { get; set; } = null!;
 
     }
 }

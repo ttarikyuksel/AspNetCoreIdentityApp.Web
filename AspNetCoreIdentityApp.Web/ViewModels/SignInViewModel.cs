@@ -17,14 +17,14 @@ namespace AspNetCoreIdentityApp.Web.ViewModels
         [EmailAddress(ErrorMessage = "Email Formatı Yanlış.")]
         [Required(ErrorMessage = "Email  Alanı Boş Bırakılmaz.")]
         [Display(Name = "Email :")]
-        public string Email { get; set; }
+        public string Email { get; set; } = null!;
 
 
         [DataType(DataType.Password)]
         [Required(ErrorMessage = "Şifre Alanı Boş Bırakılamaz")]
         [Display(Name = "Şifre :")]
         [MinLength(6, ErrorMessage = "Şifreniz en az 6 karakter olabilir.")]
-        public string Password { get; set; }
+        public string Password { get; set; } = null!;
 
         [Display(Name = "Beni Hatırla")]
         public bool RememberMe { get; set; }
