@@ -4,6 +4,8 @@ using AspNetCoreIdentityApp.Web.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.Extensions.FileProviders;
 
 namespace AspNetCoreIdentityApp.Web.Controllers
 {
@@ -12,11 +14,13 @@ namespace AspNetCoreIdentityApp.Web.Controllers
     {
         private readonly SignInManager<AppUser> _signInManager;
         private readonly UserManager<AppUser> _userManager;
+        private readonly IFileProvider _fileProvider;
 
-        public MemberController(SignInManager<AppUser> signInManager, UserManager<AppUser> userManager)
+        public MemberController(SignInManager<AppUser> signInManager, UserManager<AppUser> userManager, IFileProvider fileProvider)
         {
             _signInManager = signInManager;
             _userManager = userManager;
+            _fileProvider = fileProvider;
         }
 
         public async Task<IActionResult> Index()
@@ -72,6 +76,51 @@ namespace AspNetCoreIdentityApp.Web.Controllers
             await _signInManager.PasswordSignInAsync(currentUser!,request.PasswordNew,true,false);
 
             TempData["SuccessMessage"] = "Şifre Değiştirme İşlemi Başarıyla Gerçekleşmiştir.";
+
+            return View();
+        }
+
+        public async Task<IActionResult> UserEdit()
+        {
+            ViewBag.Gender = new SelectList(Enum.GetNames(typeof(Gender)));
+
+            var currentUser = await _userManager.FindByNameAsync(User.Identity!.Name!);
+
+            var userEditViewModel = new UserEditViewModel()
+            {
+                UserName = currentUser.UserName!,
+                Email = currentUser.Email!,
+                Phone = currentUser.PhoneNumber!,
+                BirthDate = currentUser.BirthDate,
+                City = currentUser.City,
+                Gender = currentUser.Gender,
+            };
+
+            return View(userEditViewModel);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UserEdit(UserEditViewModel request)
+        {
+
+            if (!ModelState.IsValid)
+            {
+                return View();
+            }
+
+            if (request.Picture != null && request.Picture.Length > 0 )
+            {
+                var wwrootFolder = _fileProvider.GetDirectoryContents("wwwroot");
+
+                var randomFileName = $"Guid.NewGuid().ToString(){Path.GetExtension(request.Picture.FileName)}";
+
+                var newPicturePath = Path.Combine(wwrootFolder!.First(x => x.Name == "userPictures").PhysicalPath!, randomFileName);
+
+                using var stream = new FileStream(newPicturePath, FileMode.Create);
+
+                await request.Picture.CopyToAsync(stream);
+
+            }
 
             return View();
         }
