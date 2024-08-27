@@ -20,7 +20,6 @@
   <ItemGroup>
     <Folder Include="Areas\Admin\Data\" />
     <Folder Include="Migrations\" />
-    <Folder Include="wwwroot\userpictures\" />
   </ItemGroup>
 
 </Project>

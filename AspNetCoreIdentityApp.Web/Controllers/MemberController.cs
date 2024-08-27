@@ -27,10 +27,14 @@ namespace AspNetCoreIdentityApp.Web.Controllers
         {
             var currentUser = await _userManager.FindByNameAsync(User.Identity!.Name!);
 
-            var userViewModel = new UserViewModel {
+            var userViewModel = new UserViewModel
+            {
                 Email = currentUser!.Email,
                 PhoneNumber = currentUser.PhoneNumber,
-                UserName = currentUser.UserName };
+                UserName = currentUser.UserName,
+                PictureUrl = currentUser.Picture
+                
+            };
             return View(userViewModel);
         }
 
@@ -108,21 +112,58 @@ namespace AspNetCoreIdentityApp.Web.Controllers
                 return View();
             }
 
+            var currentUser = await _userManager.FindByNameAsync(User.Identity!.Name!);
+
+            currentUser.UserName = request.UserName;
+            currentUser.Email = request.Email;
+            currentUser.BirthDate = request.BirthDate;
+            currentUser.City = request.City;
+            currentUser.Gender = request.Gender;
+            currentUser.PhoneNumber = request.Phone;
+
+            
+
             if (request.Picture != null && request.Picture.Length > 0 )
             {
                 var wwrootFolder = _fileProvider.GetDirectoryContents("wwwroot");
 
-                var randomFileName = $"Guid.NewGuid().ToString(){Path.GetExtension(request.Picture.FileName)}";
+                var randomFileName = $"{Guid.NewGuid().ToString()}{Path.GetExtension(request.Picture.FileName)}";
 
-                var newPicturePath = Path.Combine(wwrootFolder!.First(x => x.Name == "userPictures").PhysicalPath!, randomFileName);
+                var newPicturePath = Path.Combine(wwrootFolder!.First(x => x.Name == "userpictures").PhysicalPath!, randomFileName);
 
                 using var stream = new FileStream(newPicturePath, FileMode.Create);
 
                 await request.Picture.CopyToAsync(stream);
 
+                currentUser.Picture = randomFileName;
+
             }
 
-            return View();
+            var updateToUserResult = await _userManager.UpdateAsync(currentUser);
+
+            if (!updateToUserResult.Succeeded)
+            {
+                ModelState.AddModelErrorList(updateToUserResult.Errors);
+                return View();
+            }
+
+            await _userManager.UpdateSecurityStampAsync(currentUser);
+            await _signInManager.SignOutAsync();
+            await _signInManager.SignInAsync(currentUser,true);
+
+            TempData["SuccessMessage"] = "Üye Bilgileri Güncellenmiştir.";
+
+            var userEditViewModel = new UserEditViewModel()
+            {
+                UserName = currentUser.UserName!,
+                Email = currentUser.Email!,
+                Phone = currentUser.PhoneNumber!,
+                BirthDate = currentUser.BirthDate,
+                City = currentUser.City,
+                Gender = currentUser.Gender                
+            };
+
+            return View(userEditViewModel);
         }
     }
 }

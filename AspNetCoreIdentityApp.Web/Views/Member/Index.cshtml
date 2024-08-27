@@ -4,6 +4,12 @@
 @model UserViewModel
 
 <div class="row">
+    <div class="col-md-6 offset-md-3 text-center">
+        <user-picture-thumbnail class="rounded" style="width:300px" picture-url="@Model.PictureUrl"></user-picture-thumbnail>
+    </div>
+</div>
+<br />
+<div class="row">
     <div class="col-md-6 offset-md-3">
         <h1>Kullanıcı Bilgileri</h1>
         <table class="table"> 
