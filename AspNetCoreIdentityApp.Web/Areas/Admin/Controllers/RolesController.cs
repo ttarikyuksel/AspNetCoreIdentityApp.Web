@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using AspNetCoreIdentityApp.Web.Extensions;
+using Microsoft.EntityFrameworkCore;
 
 namespace AspNetCoreIdentityApp.Web.Areas.Admin.Controllers
 {
@@ -20,9 +21,17 @@ namespace AspNetCoreIdentityApp.Web.Areas.Admin.Controllers
 
         private readonly RoleManager<AppRole> _roleManager;
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View();
+            var roles = await _roleManager.Roles.Select(x => new RoleViewModel()
+            {
+                Id = x.Id,
+                Name = x.Name!
+            }).ToListAsync();
+
+
+
+            return View(roles);
         }
 
 
@@ -45,6 +54,34 @@ namespace AspNetCoreIdentityApp.Web.Areas.Admin.Controllers
             }
 
             return RedirectToAction(nameof(RolesController.Index));
+        }
+
+        public async Task<IActionResult> RoleUpdate(string id)
+        {
+            var roleUpdate = await _roleManager.FindByIdAsync(id);
+
+            if (roleUpdate == null)
+            {
+                throw new Exception("Güncellenecek rol bulunamamıştır");
+            }
+
+            return View(new RoleUpdateViewModel() { Id=roleUpdate.Id,Name = roleUpdate!.Name!});
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> RoleUpdate(RoleUpdateViewModel request)
+        {
+            var roleToUpdate = await _roleManager.FindByIdAsync(request.Id);
+
+            if (roleToUpdate == null)
+            {
+                throw new Exception("Güncellenecek rol bulunamamıştır");
+            }
+
+            roleToUpdate.Name = request.Name;
+            await _roleManager.UpdateAsync(roleToUpdate);
+
+            return View();
         }
     }
 }
