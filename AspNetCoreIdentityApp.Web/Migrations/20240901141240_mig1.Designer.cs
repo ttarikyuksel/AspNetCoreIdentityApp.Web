@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AspNetCoreIdentityApp.Web.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240826125150_mig5")]
-    partial class mig5
+    [Migration("20240901141240_mig1")]
+    partial class mig1
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -77,8 +77,8 @@ namespace AspNetCoreIdentityApp.Web.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
 
-                    b.Property<int?>("Gender")
-                        .HasColumnType("int");
+                    b.Property<byte?>("Gender")
+                        .HasColumnType("tinyint");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
