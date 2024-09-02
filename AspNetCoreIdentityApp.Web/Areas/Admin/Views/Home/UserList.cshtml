@@ -11,6 +11,7 @@
             <th>Id</th>
             <th>Kullanıcı Adı</th>
             <th>Email</th>
+            <th></th>
         </tr>
     </thead>
 
@@ -21,6 +22,7 @@
                 <td>@item.Id</td>
                 <td>@item.Name</td>
                 <td>@item.Email</td>
+                <td><a class="btn btn-primary" asp-route="Admin" asp-controller="">Rol Ata</a></td>
             </tr>
         }
     </tbody>

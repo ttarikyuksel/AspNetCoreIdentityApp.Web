@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AspNetCoreIdentityApp.Web.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240901141240_mig1")]
+    [Migration("20240902110800_mig1")]
     partial class mig1
     {
         /// <inheritdoc />

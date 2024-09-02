@@ -104,5 +104,37 @@ namespace AspNetCoreIdentityApp.Web.Areas.Admin.Controllers
             TempData["SuccessMessage"] = "Rol Silinmiştir.";
             return RedirectToAction(nameof(RolesController.Index));
         }
+
+        public async Task<IActionResult> AssignRoleToUser(string id)
+        {
+            var currentUser = await _userManager.FindByIdAsync(id);
+
+            var roles = await _roleManager.Roles.ToListAsync();
+
+            var roleViewModelList = new List<AssignRoleToUserViewModel>();
+
+            var userRoles = await _userManager.GetRolesAsync(currentUser!);
+
+            foreach (var role in roles)
+            {
+                var assignRoleToUserViewModel = new AssignRoleToUserViewModel() { Id = role.Id, Name = role.Name! };
+
+                if (userRoles.Contains(role.Name!))
+                {
+                    assignRoleToUserViewModel.Exist = true;
+                }
+
+                roleViewModelList.Add(assignRoleToUserViewModel);
+            }
+
+            return View(roleViewModelList);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AssignRoleToUser(List<AssignRoleToUserViewModel> requestList)
+        {
+            return View();
+        }
+
     }
 }
