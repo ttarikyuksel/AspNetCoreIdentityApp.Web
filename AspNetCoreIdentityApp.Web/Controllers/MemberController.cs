@@ -25,6 +25,8 @@ namespace AspNetCoreIdentityApp.Web.Controllers
 
         public async Task<IActionResult> Index()
         {
+            var userClaims = User.Claims.ToList();
+
             var currentUser = await _userManager.FindByNameAsync(User.Identity!.Name!);
 
             var userViewModel = new UserViewModel
@@ -37,8 +39,6 @@ namespace AspNetCoreIdentityApp.Web.Controllers
             };
             return View(userViewModel);
         }
-
-
 
         public async Task Logout()
         {
@@ -166,6 +166,27 @@ namespace AspNetCoreIdentityApp.Web.Controllers
             return View(userEditViewModel);
         }
 
+
+        [HttpGet]
+        public IActionResult Claims()            
+        {
+
+            var userClaimList = User.Claims.Select(x => new ClaimViewModel()
+            {
+                Issuer = x.Issuer,
+                Type = x.Type,
+                Value = x.Value
+            }).ToList();
+            return View(userClaimList);
+        }
+
+        [Authorize(Policy = "AnkaraPolicy")]
+        [HttpGet]
+        public IActionResult AnkaraPage()
+        {
+            return View();
+        }
+
         public IActionResult AccessDenied(string ReturnUrl)
         {
 
@@ -175,5 +196,7 @@ namespace AspNetCoreIdentityApp.Web.Controllers
             ViewBag.message = message;
             return View();
         }
+
+        
     }
 }
