@@ -6,6 +6,7 @@ using System.Diagnostics;
 using AspNetCoreIdentityApp.Web.Extensions;
 using AspNetCoreIdentityApp.Web.Services;
 using System.Collections.Generic;
+using System.Security.Claims;
 
 namespace AspNetCoreIdentityApp.Web.Controllers
 {
@@ -48,13 +49,13 @@ namespace AspNetCoreIdentityApp.Web.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> SignIn(SignInViewModel model,string? returnUrl=null)
+        public async Task<IActionResult> SignIn(SignInViewModel model, string? returnUrl = null)
         {
             if (!ModelState.IsValid)
             {
                 return View();
             }
-            returnUrl = returnUrl ?? Url.Action("Index","Home");
+            returnUrl = returnUrl ?? Url.Action("Index", "Home");
 
             var hasUser = await _userManager.FindByEmailAsync(model.Email);
 
@@ -63,7 +64,7 @@ namespace AspNetCoreIdentityApp.Web.Controllers
                 ModelState.AddModelError(string.Empty, "Email veya şifre yanlış");
                 return View();
             }
-            var signInResult = await _signInManager.PasswordSignInAsync(hasUser, model.Password,model.RememberMe,true);
+            var signInResult = await _signInManager.PasswordSignInAsync(hasUser, model.Password, model.RememberMe, true);
 
             if (signInResult.Succeeded)
             {
@@ -76,15 +77,11 @@ namespace AspNetCoreIdentityApp.Web.Controllers
                 return View();
             }
 
-
-            
             ModelState.AddModelErrorList(new List<string>() { $"Email veya Şifre yanlış", $"(Başarısız giriş sayısı = {await _userManager.GetAccessFailedCountAsync(hasUser)})." });
-            
+
 
             return View();
         }
-
-
 
         [HttpPost]
         public async Task<IActionResult> SignUp(SignUpViewModel request)
@@ -96,14 +93,26 @@ namespace AspNetCoreIdentityApp.Web.Controllers
 
             var identityResult = await _userManager.CreateAsync(new() { UserName = request.UserName, PhoneNumber = request.Phone, Email = request.Email }, request.Password);
 
-            if (identityResult.Succeeded)
+
+            if (!identityResult.Succeeded)
             {
-                TempData["SuccessMessage"] = "Üyelik Kayıt İşlemi Başarıyla Gerçekleşmiştir.";
-                return RedirectToAction(nameof(HomeController.SignUp));
+                ModelState.AddModelErrorList(identityResult.Errors.Select(x => x.Description).ToList());
+                return View();
+
             }
 
-            ModelState.AddModelErrorList(identityResult.Errors.Select(x => x.Description).ToList());
-            return View();
+            var exchangeExpireClaim = new Claim("ExchangeExpireDate", DateTime.Now.AddDays(10).ToString());
+            var user = await _userManager.FindByNameAsync(request.UserName);
+            var claimResult = await _userManager.AddClaimAsync(user!, exchangeExpireClaim);
+
+            if (!claimResult.Succeeded)
+            {
+                ModelState.AddModelErrorList(claimResult.Errors.Select(x => x.Description).ToList());
+                return View();
+            }
+
+            TempData["SuccessMessage"] = "Üyelik Kayıt İşlemi Başarıyla Gerçekleşmiştir.";
+            return RedirectToAction(nameof(HomeController.SignUp));
         }
 
         public IActionResult ForgetPassword()
@@ -116,7 +125,7 @@ namespace AspNetCoreIdentityApp.Web.Controllers
         {
             var hasUser = await _userManager.FindByEmailAsync(request.Email);
 
-            if(hasUser == null)
+            if (hasUser == null)
             {
                 ModelState.AddModelError(String.Empty, "Bu email adresine sahip kullanıcı bulunamamıştır.");
                 return View();
@@ -124,7 +133,7 @@ namespace AspNetCoreIdentityApp.Web.Controllers
 
             string passwordResetToken = await _userManager.GeneratePasswordResetTokenAsync(hasUser);
 
-            var passwordResetLink = Url.Action("ResetPassword", "Home", new {userId=hasUser.Id,Token = passwordResetToken},HttpContext.Request.Scheme);
+            var passwordResetLink = Url.Action("ResetPassword", "Home", new { userId = hasUser.Id, Token = passwordResetToken }, HttpContext.Request.Scheme);
 
 
 
@@ -137,7 +146,7 @@ namespace AspNetCoreIdentityApp.Web.Controllers
             return RedirectToAction(nameof(ForgetPassword));
         }
 
-        public async Task<IActionResult> ResetPassword(string userId,string token)
+        public async Task<IActionResult> ResetPassword(string userId, string token)
         {
             TempData["userId"] = userId;
             TempData["token"] = token;
@@ -153,7 +162,7 @@ namespace AspNetCoreIdentityApp.Web.Controllers
             var userId = TempData["userId"];
             var token = TempData["token"];
 
-            if(userId == null || token == null)
+            if (userId == null || token == null)
             {
                 throw new Exception("Bir hata meydana geldi.");
             }
@@ -181,10 +190,6 @@ namespace AspNetCoreIdentityApp.Web.Controllers
             return View();
 
         }
-
-
-
-
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
