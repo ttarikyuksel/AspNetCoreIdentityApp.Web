@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace AspNetCoreIdentityApp.Web.Requirements
 {
@@ -14,12 +15,20 @@ namespace AspNetCoreIdentityApp.Web.Requirements
             if (!context.User.HasClaim(x => x.Type == "ExchangeExpireDate"))
             {
                 context.Fail();
+                return Task.CompletedTask;
+
             }
 
-            var ExchangeExpireDate = context.User.FindFirst("ExchangeExpireDate");
+            Claim ExchangeExpireDate = context.User.FindFirst("ExchangeExpireDate");
 
-            //ExchangeExpireDate
+            if (DateTime.Now > Convert.ToDateTime(ExchangeExpireDate.Value))
+            {
+                context.Fail();
+                return Task.CompletedTask;
+            }
 
+            context.Succeed(requirement);
+            
 
             return Task.CompletedTask;
         }
